@@ -1,5 +1,7 @@
 # Gasper!
 
+[![Build Status](https://travis-ci.org/wavesoftware/java-gasper.svg?branch=master)](https://travis-ci.org/wavesoftware/java-gasper)
+
 Gasper is a very simple integration testing JUnit harness for `java -jar` servers like [WildFly Swarm](http://wildfly-swarm.io/) and [Spring Boot](http://projects.spring.io/spring-boot/).
 
 [![WildFly Swarm](https://avatars3.githubusercontent.com/u/11523816?v=3&s=100)](http://wildfly-swarm.io/) [![Spring Boot](https://avatars2.githubusercontent.com/u/317776?v=3&s=100)](http://projects.spring.io/spring-boot/)
