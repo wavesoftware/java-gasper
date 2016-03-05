@@ -127,7 +127,6 @@
                     <execution>
                         <id>prepare-packages</id>
                         <goals>
-                            <goal>install</goal>
                             <goal>run</goal>
                         </goals>
                         <phase>package</phase>
@@ -135,6 +134,7 @@
                 </executions>
                 <configuration>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+                    <parallelThreads>3</parallelThreads>
                 </configuration>
             </plugin>
         </plugins>
