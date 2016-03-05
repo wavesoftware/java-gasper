@@ -2,7 +2,11 @@
 
 Gasper is a very simple integration testing JUnit harness for `java -jar` servers like [WildFly Swarm](http://wildfly-swarm.io/) and [Spring Boot](http://projects.spring.io/spring-boot/).
 
-![WildFly Swarm](https://avatars3.githubusercontent.com/u/11523816?v=3&s=100) ![Spring Boot](https://avatars2.githubusercontent.com/u/317776?v=3&s=100)
+[![WildFly Swarm](https://avatars3.githubusercontent.com/u/11523816?v=3&s=100)
+WildFly Swarm](http://wildfly-swarm.io/)
+
+[![Spring Boot](https://avatars2.githubusercontent.com/u/317776?v=3&s=100)
+Spring Boot](http://projects.spring.io/spring-boot/)
 
 Gasper provides a simple to use JUnit `TestRule` that can be used to build integration tests with simple apps, like microservices. You can configure Gasper with easy to use builder interface.
 
