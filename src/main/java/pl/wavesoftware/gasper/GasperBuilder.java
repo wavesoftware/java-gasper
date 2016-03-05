@@ -37,6 +37,8 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
     private Path pomfile = Paths.get(MavenResolver.DEFAULT_POM);
     private Level level = Level.INFO;
 
+    protected GasperBuilder() {}
+
     public GasperBuilder withPackaging(String packaging) {
         this.packaging = packaging;
         return this;

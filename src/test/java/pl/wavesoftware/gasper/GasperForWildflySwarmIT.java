@@ -40,6 +40,7 @@ public class GasperForWildflySwarmIT {
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getBody()).isEqualTo(expectedMessage);
+        assertThat(gasper.getPort()).isGreaterThanOrEqualTo(1000);
     }
 
 }

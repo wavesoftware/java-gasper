@@ -1,6 +1,8 @@
 package pl.wavesoftware.gasper.internal;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import static java.lang.String.format;
 
@@ -8,7 +10,9 @@ import static java.lang.String.format;
  * @author Krzysztof Suszyński <krzysztof.suszynski@wavesoftware.pl>
  * @since 2016-03-05
  */
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class HttpEndpoint {
     public static final String DEFAULT_SCHEME = "http";
     public static final String DEFAULT_DOMAIN = "localhost";
