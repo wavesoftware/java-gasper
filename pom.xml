@@ -11,12 +11,32 @@
     </description>
 
     <properties>
+        <netbeans.hint.license>apache20</netbeans.hint.license>
         <maven.required.version>3.0.4</maven.required.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/wavesoftware/java-gasper.git</connection>
+        <developerConnection>scm:git:git@github.com:wavesoftware/java-gasper.git</developerConnection>
+        <url>https://github.com/wavesoftware/java-gasper</url>
+    </scm>
+
+    <ciManagement>
+        <system>travis-ci</system>
+        <url>https://travis-ci.org/wavesoftware/java-gasper</url>
+    </ciManagement>
 
     <prerequisites>
         <maven>${maven.required.version}</maven>
