@@ -2,16 +2,15 @@ package pl.wavesoftware.gasper.internal.maven;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import pl.wavesoftware.eid.exceptions.EidRuntimeException;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
+import static pl.wavesoftware.eid.utils.EidPreconditions.*;
+
 
 /**
  * @author Krzysztof Suszyński <krzysztof.suszynski@wavesoftware.pl>
@@ -19,25 +18,39 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class MavenResolver {
 
-    public static final String DEFAULT_POM = "pom.xml";
+    public static final String DEFAULT_POM = "./pom.xml";
     public static final String DEFAULT_BUILD_DIR = "target";
     public static final String DEFAULT_PACKAGING = "jar";
+    private static final Path CURRENT_DIR = Paths.get("./");
     private final Model model;
+    private final Path pomDirectory;
 
     public MavenResolver() {
         this(DEFAULT_POM);
     }
 
     public MavenResolver(String pomfile) {
-        FileReader reader;
+        this(Paths.get(pomfile));
+    }
+
+    public MavenResolver(Path pomfile) {
+        checkArgument(pomfile.toFile().isFile(), "20160305:181005");
         MavenXpp3Reader mavenReader = new MavenXpp3Reader();
-        try {
-            reader = new FileReader(pomfile);
-            model = mavenReader.read(reader);
-        } catch (IOException | XmlPullParserException e) {
-            throw new EidRuntimeException("20160304:230502", e);
-        }
-        model.setPomFile(new File(pomfile));
+        model = tryToExecute((UnsafeSupplier<Model>) () -> {
+            FileReader reader = new FileReader(pomfile.toString());
+            return mavenReader.read(reader);
+        }, "20160305:203232");
+        checkNotNull(model, "20160305:203551").setPomFile(pomfile.toFile());
+        pomDirectory = pomfile.getParent() == null ? CURRENT_DIR : pomfile.getParent();
+        checkArgument(pomDirectory.toFile().isDirectory(), "20160305:181211");
+    }
+
+    public Path getBuildArtifact() {
+        return getBuildArtifact("", "");
+    }
+
+    public Path getBuildArtifact(String classifier) {
+        return getBuildArtifact("", classifier);
     }
 
     public Path getBuildArtifact(String packaging, String classifier) {
@@ -51,14 +64,17 @@ public class MavenResolver {
             artifact = String.format("%s-%s-%s.%s",
                 model.getArtifactId(), model.getVersion(), classifier, pack);
         }
-        return dir.resolve(artifact);
+        Path artifactPath = dir.resolve(Paths.get(artifact));
+        checkState(artifactPath.toFile().isFile(), "20160305:181432", "Is not a file: %s", artifactPath);
+        checkState(artifactPath.toFile().canRead(), "20160305:181456", "Can't read file: %s", artifactPath);
+        return artifactPath;
     }
 
     public File getBuildDirectory() {
         String set = model.getBuild().getOutputDirectory();
-        File directory = new File(set == null ? DEFAULT_BUILD_DIR : set);
-        checkState(directory.isDirectory(), "20160304:230811");
-        return directory;
+        Path directory = pomDirectory.resolve(Paths.get(set == null ? DEFAULT_BUILD_DIR : set));
+        checkState(directory.toFile().isDirectory(), "20160304:230811");
+        return directory.normalize().toFile();
     }
 
     public String getModelPackaging() {

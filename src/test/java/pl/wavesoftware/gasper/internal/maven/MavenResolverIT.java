@@ -26,6 +26,18 @@ public class MavenResolverIT {
     }
 
     @Test
+    public void testGetBuildArtifactForOtherPom() throws Exception {
+        // given
+        MavenResolver resolver = new MavenResolver("pom.xml");
+
+        // when
+        Path artifact = resolver.getBuildArtifact();
+
+        // then
+        assertThat(artifact).exists().isRegularFile();
+    }
+
+    @Test
     public void testGetBuildDirectory() throws Exception {
         // given
         MavenResolver resolver = new MavenResolver();
@@ -34,6 +46,6 @@ public class MavenResolverIT {
         File directory = resolver.getBuildDirectory();
 
         // then
-        assertThat(directory.getPath()).isEqualTo("target");
+        assertThat(directory.toString()).isEqualTo("target");
     }
 }

@@ -1,17 +1,21 @@
 package pl.wavesoftware.gasper;
 
 import com.google.common.collect.ImmutableMap;
-import pl.wavesoftware.eid.exceptions.EidIllegalStateException;
+import org.slf4j.event.Level;
+import pl.wavesoftware.eid.utils.EidPreconditions;
 import pl.wavesoftware.gasper.internal.Executor;
 import pl.wavesoftware.gasper.internal.HttpEndpoint;
 import pl.wavesoftware.gasper.internal.Settings;
 import pl.wavesoftware.gasper.internal.maven.MavenResolver;
 
-import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import static pl.wavesoftware.eid.utils.EidPreconditions.tryToExecute;
 
 /**
  * @author Krzysztof Suszyński <krzysztof.suszynski@wavesoftware.pl>
@@ -30,6 +34,8 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
     private int portAvailableMaxTime = Gasper.DEFAULT_PORT_AVAILABLE_MAX_SECONDS;
     private int deploymentMaxTime = Gasper.DEFAULT_DEPLOYMENT_MAX_SECONDS;
     private Function<HttpEndpoint, Boolean> contextChecker = Executor.DEFAULT_CONTEXT_CHECKER;
+    private Path pomfile = Paths.get(MavenResolver.DEFAULT_POM);
+    private Level level = Level.INFO;
 
     public GasperBuilder withPackaging(String packaging) {
         this.packaging = packaging;
@@ -61,6 +67,11 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
         return this;
     }
 
+    public GasperBuilder usePomFile(Path pomfile) {
+        this.pomfile = pomfile;
+        return this;
+    }
+
     public GasperBuilder inheritIO() {
         return inheritIO(true);
     }
@@ -81,7 +92,8 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
             packaging, classifier, port,
             ImmutableMap.copyOf(javaOptions), ImmutableMap.copyOf(environment),
             inheritIO, context, contextChecker,
-            portAvailableMaxTime, deploymentMaxTime
+            portAvailableMaxTime, deploymentMaxTime,
+            pomfile, level
         );
         return create(settings);
     }
@@ -106,11 +118,22 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
         return this;
     }
 
-    private static int findNotBindedPort() {
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        } catch (IOException ex) {
-            throw new EidIllegalStateException("20160305:000138", ex);
-        }
+    public GasperBuilder silent() {
+        useLogLevel(Level.WARN);
+        return this;
+    }
+
+    public GasperBuilder useLogLevel(Level level) {
+        this.level = level;
+        return this;
+    }
+
+    private static Integer findNotBindedPort() {
+        return tryToExecute((EidPreconditions.UnsafeSupplier<Integer>) () -> {
+            try (ServerSocket socket = new ServerSocket(0)) {
+                return socket.getLocalPort();
+            }
+        }, "20160305:202934");
+
     }
 }

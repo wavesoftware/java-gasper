@@ -29,15 +29,13 @@ public class Executor {
     public static final int WAIT_STEP = 125;
     public static final int WAIT_STEPS_IN_SECOND = 8;
     public static final Function<HttpEndpoint, Boolean> DEFAULT_CONTEXT_CHECKER = Executor::check;
-    public static final String DEFAULT_SCHEME = "http";
-    public static final String DEFAULT_DOMAIN = "localhost";
-    public static final String DEFAULT_QUERY = null;
     private static final int HTTP_OK = 200;
     private static final int HTTP_BAD_REQUEST = 400;
     private final List<String> command;
     private final File workingDirectory;
     private final Settings settings;
     private Process process;
+    private Logger logger;
 
     public void start() throws IOException {
         ProcessBuilder pb = new ProcessBuilder(command);
@@ -50,6 +48,7 @@ public class Executor {
         if (!settings.getEnvironment().isEmpty()) {
             pb.environment().putAll(settings.getEnvironment());
         }
+        log("Starting server process");
         process = pb.start();
 
         startAndWaitForPort();
@@ -57,7 +56,7 @@ public class Executor {
     }
 
     public void stop() {
-        log.info("Stopping server.");
+        log("Stopping server process");
         process.destroy();
     }
 
@@ -65,7 +64,7 @@ public class Executor {
         Integer port = settings.getPort();
         String context = settings.getContext();
         int maxWait = settings.getDeploymentMaxTime();
-        log.info(format("Waiting for deployment for context: \"%s\" to happen...", context));
+        log("Waiting for deployment for context: \"%s\" to happen...", context);
         boolean ok = waitForContextToBecomeAvailable(port, context, maxWait);
         if (!ok) {
             throw new EidIllegalStateException(new Eid("20160305:123206"),
@@ -79,9 +78,9 @@ public class Executor {
         for (int i = 1; i <= maxSeconds * WAIT_STEPS_IN_SECOND; i++) {
             try {
                 process.waitFor(WAIT_STEP, TimeUnit.MILLISECONDS);
-                if (isContextAvailable(port, context)) {
+                if (isContextAvailable()) {
                     int waited = WAIT_STEP * i;
-                    log.info(format("Context \"%s\" became available after ~%dms!", context, waited));
+                    log("Context \"%s\" became available after ~%dms!", context, waited);
                     return true;
                 }
             } catch (InterruptedException e) {
@@ -92,15 +91,7 @@ public class Executor {
     }
 
     private static Boolean check(HttpEndpoint endpoint) {
-        String address = format("%s://%s:%d%s",
-            endpoint.getScheme(),
-            endpoint.getDomain(),
-            endpoint.getPort(),
-            endpoint.getContext()
-        );
-        if (endpoint.getQuery() != null) {
-            address += "?" + endpoint.getQuery();
-        }
+        String address = endpoint.fullAddress();
         try {
             HttpResponse<InputStream> response = Unirest.head(address).asBinary();
             int status = response.getStatus();
@@ -112,16 +103,14 @@ public class Executor {
         }
     }
 
-    private boolean isContextAvailable(int port, String context) {
-        HttpEndpoint endpoint = new HttpEndpoint(
-            DEFAULT_SCHEME, DEFAULT_DOMAIN, port, context, DEFAULT_QUERY
-        );
+    private boolean isContextAvailable() {
+        HttpEndpoint endpoint = settings.getEndpoint();
         return settings.getContextChecker().apply(endpoint);
     }
 
     private void startAndWaitForPort() {
         Integer port = settings.getPort();
-        log.info(format("Starting server, waiting for port: %d to became active...", port));
+        log("Waiting for port: %d to became active...", port);
         boolean ok = waitForPortToBecomeAvailable(process, port, settings.getPortAvailableMaxTime());
         if (!ok) {
             throw new EidIllegalStateException(new Eid("20160305:003452"),
@@ -131,13 +120,13 @@ public class Executor {
         }
     }
 
-    private static boolean waitForPortToBecomeAvailable(Process process, int port, int maxSeconds) {
+    private boolean waitForPortToBecomeAvailable(Process process, int port, int maxSeconds) {
         for (int i = 1; i <= maxSeconds * WAIT_STEPS_IN_SECOND; i++) {
             try {
                 process.waitFor(WAIT_STEP, TimeUnit.MILLISECONDS);
                 if (isPortTaken(port)) {
                     int waited = WAIT_STEP * i;
-                    log.info(format("Port %d became available after ~%dms!", port, waited));
+                    log("Port %d became available after ~%dms!", port, waited);
                     return true;
                 }
             } catch (InterruptedException e) {
@@ -149,10 +138,10 @@ public class Executor {
 
     private void logToFile(ProcessBuilder pb) {
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
-        Path logFile = tempDir.toPath().resolve("gasper-server.log");
+        Path logFile = tempDir.toPath().resolve("gasper.log");
         pb.redirectErrorStream(true);
         pb.redirectOutput(logFile.toFile());
-        log.info(format("Logging server messages to: %s", logFile));
+        log("Logging server messages to: %s", logFile);
     }
 
     private static boolean isPortTaken(int port) {
@@ -160,6 +149,17 @@ public class Executor {
             return false;
         } catch (IOException ex) {
             return true;
+        }
+    }
+
+    private void log(String frmt, Object... args) {
+        ensureLogger();
+        logger.info(format(frmt, args));
+    }
+
+    private void ensureLogger() {
+        if (logger == null) {
+            logger = new Logger(log, settings);
         }
     }
 }
