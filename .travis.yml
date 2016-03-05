@@ -1,6 +1,6 @@
 ---
 language: java
-install: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+install: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dcoveralls.skip=true -B -V
 script: mvn verify -Pci
 jdk:
   - oraclejdk8
