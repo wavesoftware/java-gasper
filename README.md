@@ -6,11 +6,41 @@ Gasper is a very simple integration testing JUnit harness for `java -jar` server
 
 [![WildFly Swarm](https://avatars3.githubusercontent.com/u/11523816?v=3&s=100)](http://wildfly-swarm.io/) [![Spring Boot](https://avatars2.githubusercontent.com/u/317776?v=3&s=100)](http://projects.spring.io/spring-boot/)
 
-Gasper provides a simple to use JUnit `TestRule` that can be used to build integration tests with simple apps, like micro-services. You can configure Gasper with easy to use builder interface.
+Gasper provides a simple to use JUnit `TestRule` that can be used to build integration tests with simple apps, like REST micro-services. You can configure Gasper easily with a builder interface. Gasper will start the application before test class and stop it after tests completes.
+
+Gasper supports currently only [Maven](https://maven.apache.org/). The `pom.xml` file is used to read project configuration achieving zero configuration operation.
 
 ## Usage
 
-Best to use with libraries like [Unirest](http://unirest.io/java.html) and [JSON Assert](https://github.com/marcingrzejszczak/jsonassert)
+
+Gasper utilize your packaged application. It It means it should be used in integration tests that run after application is being packaged by build tool (Maven). Add this code to your `pom.xml` file (if you didn't done that before):
+
+```xml
+<build>
+[..]
+<plugins>
+[..]
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-failsafe-plugin</artifactId>
+    <version>2.19.1</version>
+    <executions>
+      <execution>
+        <goals>
+          <goal>integration-test</goal>
+          <goal>verify</goal>
+        </goals>
+      </execution>
+    </executions>
+  </plugin>
+[..]
+</plugins>
+[..]
+</build>
+```
+
+
+Place your integration tests in classes that ends with `*IT` or `*ITest`.
 
 ### WildFly Swarm configuration
 
@@ -30,13 +60,17 @@ public static Gasper gasper = Gasper.configurations()
   .build();
 ```
 
+Before running `GasperBuilder.build()` method, you can reconfigure those default configurations to your needs.
+
 ### Example test method (Unirest + JSONAssert)
+
+Gasper is best to use with libraries like [Unirest](http://unirest.io/java.html) for fetching data and asserting HTTP/S statuses and [JSON Assert](https://github.com/marcingrzejszczak/jsonassert) to validate correctness of JSON output for REST services.
 
 ```java
 @Test
 public void testGetRoot() throws UnirestException {
   // given
-  String address = gasper.getAddress();
+  String address = gasper.getAddress(); // Address to deployed app, running live on random port
   String expectedMessage = "WildFly Swarm!";
 
   // when
@@ -44,7 +78,7 @@ public void testGetRoot() throws UnirestException {
 
   // then
   assertThat(response.getStatus()).isEqualTo(200);
-  assertThat(response.getBody()).field("hello").isEqualTo(expectedMessage);
+  assertThat(response.getBody()).field("hello").isEqualTo(expectedMessage); // JSON Assert
 }
 ```
 
@@ -56,6 +90,7 @@ To configure Gasper use `GasperBuilder` interface, for ex.:
 private final int port = 11909;
 private final String webContext = "/test";
 private final String systemPropertyForPort = "swarm.http.port";
+
 @ClassRule
 public static Gasper gasper = Gasper.configure()
   .silentGasperMessages()
@@ -66,7 +101,7 @@ public static Gasper gasper = Gasper.configure()
   .withMaxStartupTime(100)
   .withMaxDeploymentTime(20)
   .withEnvironmentVariable("jdbc.password", "S3CreT!1")
-  .withServerLoggingOnConsole()
+  .withTestApplicationLoggingOnConsole()
   .usingPomFile(Paths.get("pom.xml"))
   .withArtifactPackaging("jar")
   .waitForWebContext(webContext)
@@ -89,7 +124,26 @@ public static Gasper gasper = Gasper.configure()
 </dependency>
 ```
 
+## Contributing
+
+Contributions are welcome!
+
+To contribute, follow the standard [git flow](http://danielkummer.github.io/git-flow-cheatsheet/) of:
+
+1. Fork it
+1. Create your feature branch (`git checkout -b feature/my-new-feature`)
+1. Commit your changes (`git commit -am 'Add some feature'`)
+1. Push to the branch (`git push origin feature/my-new-feature`)
+1. Create new Pull Request
+
+Even if you can't contribute code, if you have an idea for an improvement please open an [issue](https://github.com/wavesoftware/java-gasper/issues).
+
 ## Requirements
 
-Gasper requires Java 8. Tested on Travis CI.
+* Java 8
+* Maven 3
 
+## Releases
+
+* `1.0.0` - codename: *SkyMango*
+	* First publicly available release

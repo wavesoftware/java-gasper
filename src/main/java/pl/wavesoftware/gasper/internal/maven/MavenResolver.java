@@ -22,6 +22,8 @@ public class MavenResolver {
     public static final String DEFAULT_POM = "./pom.xml";
     public static final String DEFAULT_BUILD_DIR = "target";
     public static final String DEFAULT_PACKAGING = "jar";
+    public static final String DEFAULT_CLASSIFIER = "";
+
     private static final Path CURRENT_DIR = Paths.get("./");
     private final Model model;
     private final Path pomDirectory;

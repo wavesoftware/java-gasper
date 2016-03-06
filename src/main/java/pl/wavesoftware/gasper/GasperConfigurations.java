@@ -14,6 +14,8 @@ package pl.wavesoftware.gasper;
  *     .build();
  * </pre>
  *
+ * More info in {@link Gasper} javadoc
+ *
  * @author Krzysztof Suszyński <krzysztof.suszynski@wavesoftware.pl>
  * @since 2016-03-05
  */
