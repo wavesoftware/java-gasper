@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.wavesoftware</groupId>
     <artifactId>gasper</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>Gasper</name>
     <description>Very simple integration testing JUnit harness for 'java -jar' servers like WildFly Swarm and Spring Boot
