@@ -26,7 +26,7 @@ public class GasperForSpringBootIT {
     @ClassRule
     public static Gasper gasper = Gasper.configurations()
         .springBoot()
-        .usePomFile(SPRING_BOOT_POMFILE)
+        .usingPomFile(SPRING_BOOT_POMFILE)
         .build();
 
     @Test

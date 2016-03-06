@@ -148,6 +148,7 @@ public class Executor {
         try (ServerSocket ignored = new ServerSocket(port)) {
             return false;
         } catch (IOException ex) {
+            log.trace(format("Port %d taken", port), ex);
             return true;
         }
     }

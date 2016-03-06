@@ -1,14 +1,14 @@
 package pl.wavesoftware.gasper.internal;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.slf4j.event.Level;
 import pl.wavesoftware.gasper.Gasper;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -23,13 +23,13 @@ import java.util.function.Function;
  * @see Gasper#configurations()
  */
 @Getter
-@Setter
 @RequiredArgsConstructor
 public class Settings {
     private final String packaging;
     private final String classifier;
     private final int port;
-    private final Map<String, String> javaOptions;
+    private final Map<String, String> systemProperties;
+    private final List<String> jvmOptions;
     private final Map<String, String> environment;
     private final boolean inheritIO;
     private final String context;
@@ -38,19 +38,26 @@ public class Settings {
     private final int deploymentMaxTime;
     private final Path pomfile;
     private final Level level;
-    @Setter(AccessLevel.NONE)
     private HttpEndpoint endpoint;
 
     /**
-     * Gets Java options as map
+     * Retrieves Java <code>-D</code> style options as map
      * @return a map for Java options
      */
-    public Map<String, String> getJavaOptions() {
-        return ImmutableMap.copyOf(javaOptions);
+    public Map<String, String> getSystemProperties() {
+        return ImmutableMap.copyOf(systemProperties);
     }
 
     /**
-     * Gets environment variables as a map
+     * Retrieves Java VM options as list
+     * @return a map for Java options
+     */
+    public List<String> getJvmOptions() {
+        return ImmutableList.copyOf(jvmOptions);
+    }
+
+    /**
+     * Retrieves environment variables as a map
      * @return a map for environment variables
      */
     public Map<String, String> getEnvironment() {

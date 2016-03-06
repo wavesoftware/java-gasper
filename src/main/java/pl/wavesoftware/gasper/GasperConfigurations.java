@@ -27,14 +27,14 @@ public final class GasperConfigurations {
      * <p>
      * You can use it directly or use {@link GasperBuilder} interface to re-configure it to you needs.
      * <p>
-     * To use it in JUnit execute method {@link GasperBuilder#create()}
+     * To use it in JUnit execute method {@link GasperBuilder#build()}
      * @return pre-configured {@link GasperBuilder} to use with WildFly Swarm.
      */
     public GasperBuilder wildflySwarm() {
         return Gasper.builder()
-            .withPackaging("jar")
-            .withClassifier("swarm")
-            .usePortJavaOptionFor(GasperConfigurations.WILDFLY_SWARM);
+            .withArtifactPackaging("jar")
+            .withArtifactClassifier("swarm")
+            .usingSystemPropertyForPort(GasperConfigurations.WILDFLY_SWARM);
     }
 
     /**
@@ -42,12 +42,12 @@ public final class GasperConfigurations {
      * <p>
      * You can use it directly or use {@link GasperBuilder} interface to re-configure it to you needs.
      * <p>
-     * To use it in JUnit execute method {@link GasperBuilder#create()}
+     * To use it in JUnit execute method {@link GasperBuilder#build()}
      * @return pre-configured {@link GasperBuilder} to use with Spring Boot.
      */
     public GasperBuilder springBoot() {
         return Gasper.builder()
-            .withPackaging("jar")
-            .usePortJavaOptionFor(GasperConfigurations.SPRING_BOOT);
+            .withArtifactPackaging("jar")
+            .usingSystemPropertyForPort(GasperConfigurations.SPRING_BOOT);
     }
 }

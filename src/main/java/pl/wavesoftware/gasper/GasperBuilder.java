@@ -1,6 +1,5 @@
 package pl.wavesoftware.gasper;
 
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.event.Level;
 import pl.wavesoftware.eid.utils.EidPreconditions;
 import pl.wavesoftware.gasper.internal.Executor;
@@ -11,7 +10,10 @@ import pl.wavesoftware.gasper.internal.maven.MavenResolver;
 import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -25,9 +27,10 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
 
     private String packaging = MavenResolver.DEFAULT_PACKAGING;
     private String classifier = "";
-    private Map<String, String> javaOptions = new LinkedHashMap<>();
+    private Map<String, String> systemProperties = new LinkedHashMap<>();
+    private List<String> jvmOptions = new ArrayList<>();
     private Map<String, String> environment = new LinkedHashMap<>();
-    private String portJavaOption;
+    private String systemPropertyForPort;
     private Integer port;
     private boolean inheritIO = false;
     private String context = Gasper.DEFAULT_CONTEXT;
@@ -39,12 +42,12 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
 
     protected GasperBuilder() {}
 
-    public GasperBuilder withPackaging(String packaging) {
+    public GasperBuilder withArtifactPackaging(String packaging) {
         this.packaging = packaging;
         return this;
     }
 
-    public GasperBuilder withClassifier(String classifier) {
+    public GasperBuilder withArtifactClassifier(String classifier) {
         this.classifier = classifier;
         return this;
     }
@@ -54,8 +57,13 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
         return this;
     }
 
-    public GasperBuilder withJavaOption(String key, String value) {
-        javaOptions.put(key, value);
+    public GasperBuilder withSystemProperty(String key, String value) {
+        systemProperties.put(key, value);
+        return this;
+    }
+
+    public GasperBuilder withJVMOptions(String... options) {
+        Collections.addAll(jvmOptions, options);
         return this;
     }
 
@@ -64,22 +72,52 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
         return this;
     }
 
-    public GasperBuilder usePortJavaOptionFor(String portJavaOption) {
-        this.portJavaOption = portJavaOption;
+    public GasperBuilder usingSystemPropertyForPort(String systemPropertyForPort) {
+        this.systemPropertyForPort = systemPropertyForPort;
         return this;
     }
 
-    public GasperBuilder usePomFile(Path pomfile) {
+    public GasperBuilder usingPomFile(Path pomfile) {
         this.pomfile = pomfile;
         return this;
     }
 
-    public GasperBuilder inheritIO() {
-        return inheritIO(true);
+    public GasperBuilder withServerLoggingOnConsole() {
+        return withServerLoggingOnConsole(true);
     }
 
-    public GasperBuilder inheritIO(boolean inheritIO) {
+    public GasperBuilder withServerLoggingOnConsole(boolean inheritIO) {
         this.inheritIO = inheritIO;
+        return this;
+    }
+
+    public GasperBuilder withMaxStartupTime(int seconds) {
+        this.portAvailableMaxTime = seconds;
+        return this;
+    }
+
+    public GasperBuilder withMaxDeploymentTime(int seconds) {
+        this.deploymentMaxTime = seconds;
+        return this;
+    }
+
+    public GasperBuilder waitForWebContext(String context) {
+        this.context = context;
+        return this;
+    }
+
+    public GasperBuilder usingWebContextChecker(Function<HttpEndpoint, Boolean> contextChecker) {
+        this.contextChecker = contextChecker;
+        return this;
+    }
+
+    public GasperBuilder silentGasperMessages() {
+        usingLogLevel(Level.WARN);
+        return this;
+    }
+
+    public GasperBuilder usingLogLevel(Level level) {
+        this.level = level;
         return this;
     }
 
@@ -87,47 +125,17 @@ public final class GasperBuilder extends Gasper.RunnerCreator {
         if (port == null) {
             port = findNotBindedPort();
         }
-        if (portJavaOption != null) {
-            withJavaOption(portJavaOption, port.toString());
+        if (systemPropertyForPort != null) {
+            withSystemProperty(systemPropertyForPort, port.toString());
         }
         Settings settings = new Settings(
             packaging, classifier, port,
-            ImmutableMap.copyOf(javaOptions), ImmutableMap.copyOf(environment),
+            systemProperties, jvmOptions, environment,
             inheritIO, context, contextChecker,
             portAvailableMaxTime, deploymentMaxTime,
             pomfile, level
         );
         return create(settings);
-    }
-
-    public GasperBuilder maxStartupTime(int seconds) {
-        this.portAvailableMaxTime = seconds;
-        return this;
-    }
-
-    public GasperBuilder maxDeploymentTime(int seconds) {
-        this.deploymentMaxTime = seconds;
-        return this;
-    }
-
-    public GasperBuilder waitForContext(String context) {
-        this.context = context;
-        return this;
-    }
-
-    public GasperBuilder useContextChecker(Function<HttpEndpoint, Boolean> contextChecker) {
-        this.contextChecker = contextChecker;
-        return this;
-    }
-
-    public GasperBuilder silent() {
-        useLogLevel(Level.WARN);
-        return this;
-    }
-
-    public GasperBuilder useLogLevel(Level level) {
-        this.level = level;
-        return this;
     }
 
     private static Integer findNotBindedPort() {

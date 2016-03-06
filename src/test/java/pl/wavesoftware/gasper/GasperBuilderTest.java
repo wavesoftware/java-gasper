@@ -19,18 +19,24 @@ public class GasperBuilderTest {
     @Test
     public void testBuild() throws Exception {
         GasperBuilder builder = new GasperBuilder();
-        Gasper gasper = builder.withJavaOption("swarm.context.path", "/sub")
-            .maxStartupTime(100)
-            .maxDeploymentTime(20)
+        int port = 11909;
+        String webContext = "/test";
+        String systemPropertyForPort = "swarm.http.port";
+        Gasper gasper = builder.silentGasperMessages()
+            .usingSystemPropertyForPort(systemPropertyForPort)
+            .withSystemProperty("swarm.context.path", webContext)
+            .withSystemProperty(systemPropertyForPort, String.valueOf(port))
+            .withJVMOptions("-server", "-Xms1G", "-Xmx1G", "-XX:+UseConcMarkSweepGC")
+            .withMaxStartupTime(100)
+            .withMaxDeploymentTime(20)
             .withEnvironmentVariable("jdbc.password", "S3CreT!1")
-            .inheritIO()
-            .silent()
-            .usePomFile(Paths.get("pom.xml"))
-            .withPackaging("jar")
-            .waitForContext("/sub")
-            .withClassifier("swarm")
-            .useContextChecker(GasperBuilderTest::checkContext)
-            .withPort(11909)
+            .withServerLoggingOnConsole()
+            .usingPomFile(Paths.get("pom.xml"))
+            .withArtifactPackaging("jar")
+            .waitForWebContext(webContext)
+            .withArtifactClassifier("swarm")
+            .usingWebContextChecker(GasperBuilderTest::checkContext)
+            .withPort(port)
             .build();
 
         assertThat(gasper).isNotNull();

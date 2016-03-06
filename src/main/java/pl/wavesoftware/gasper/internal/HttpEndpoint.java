@@ -25,7 +25,7 @@ public class HttpEndpoint {
     private final String query;
 
     public String fullAddress() {
-        String address = format("%s://%s:%d%s",
+        String address = format("%s://%s:%s%s",
             getScheme(),
             getDomain(),
             getPort(),

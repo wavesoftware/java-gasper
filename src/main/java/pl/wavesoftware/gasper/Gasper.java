@@ -122,7 +122,8 @@ public final class Gasper implements TestRule {
     }
 
     private void buildJavaOptions(List<String> command) {
-        command.addAll(settings.getJavaOptions().entrySet().stream()
+        command.addAll(settings.getJvmOptions());
+        command.addAll(settings.getSystemProperties().entrySet().stream()
             .map(entry -> format("-D%s=%s", entry.getKey(), entry.getValue()))
             .collect(Collectors.toList())
         );

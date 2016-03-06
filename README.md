@@ -6,7 +6,7 @@ Gasper is a very simple integration testing JUnit harness for `java -jar` server
 
 [![WildFly Swarm](https://avatars3.githubusercontent.com/u/11523816?v=3&s=100)](http://wildfly-swarm.io/) [![Spring Boot](https://avatars2.githubusercontent.com/u/317776?v=3&s=100)](http://projects.spring.io/spring-boot/)
 
-Gasper provides a simple to use JUnit `TestRule` that can be used to build integration tests with simple apps, like microservices. You can configure Gasper with easy to use builder interface.
+Gasper provides a simple to use JUnit `TestRule` that can be used to build integration tests with simple apps, like micro-services. You can configure Gasper with easy to use builder interface.
 
 ## Usage
 
@@ -48,22 +48,31 @@ public void testGetRoot() throws UnirestException {
 }
 ```
 
-### Addtional configuration
+### Additional configuration
 
 To configure Gasper use `GasperBuilder` interface, for ex.:
 
 ```java
+private final int port = 11909;
+private final String webContext = "/test";
+private final String systemPropertyForPort = "swarm.http.port";
 @ClassRule
-public static Gasper gasper = Gasper.configurations()
-  .wildflySwarm()
-  .usePomFile(Paths.get("target", "it", "wildfly-swarm-tester", "pom.xml"))
-  .inheritIO()
-  .maxStartupTime(120)
-  .maxDeploymentTime(20)
-  .useContextChecker(MyTestClass::contextChecker)
-  .withEnvironmentVariable("jdbc.password", DEV_PASSWORD)
-  .withJavaOption("my.minus-d.option", "true")
-  .silent()
+public static Gasper gasper = Gasper.builder()
+  .silentGasperMessages()
+  .usingSystemPropertyForPort(systemPropertyForPort)
+  .withSystemProperty("swarm.context.path", webContext)
+  .withSystemProperty(systemPropertyForPort, String.valueOf(port))
+  .withJVMOptions("-server", "-Xms1G", "-Xmx1G", "-XX:+UseConcMarkSweepGC")
+  .withMaxStartupTime(100)
+  .withMaxDeploymentTime(20)
+  .withEnvironmentVariable("jdbc.password", "S3CreT!1")
+  .withServerLoggingOnConsole()
+  .usingPomFile(Paths.get("pom.xml"))
+  .withArtifactPackaging("jar")
+  .waitForWebContext(webContext)
+  .withArtifactClassifier("swarm")
+  .usingWebContextChecker(GasperBuilderTest::checkContext)
+  .withPort(port)
   .build();
 ```
 

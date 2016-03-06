@@ -24,8 +24,8 @@ public class GasperForWildflySwarmIT {
     @ClassRule
     public static Gasper gasper = Gasper.configurations()
         .wildflySwarm()
-        .usePomFile(WILDFLY_SWARM_POMFILE)
-        .silent()
+        .usingPomFile(WILDFLY_SWARM_POMFILE)
+        .silentGasperMessages()
         .build();
 
     @Test
