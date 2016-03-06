@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Gasper! by wavesoftware</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Gasper!</h1>
+      <h2 class="project-tagline">Very simple integration testing JUnit harness for &#39;java -jar&#39; servers like WildFly Swarm and Spring Boot</h2>
+      <a href="https://github.com/wavesoftware/java-gasper" class="btn">View on GitHub</a>
+      <a href="https://github.com/wavesoftware/java-gasper/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/wavesoftware/java-gasper/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="gasper" class="anchor" href="#gasper" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Gasper!</h1>
+
+<p><a href="https://travis-ci.org/wavesoftware/java-gasper"><img src="https://travis-ci.org/wavesoftware/java-gasper.svg?branch=develop" alt="Build Status"></a> <a href="https://coveralls.io/github/wavesoftware/java-gasper?branch=develop"><img src="https://coveralls.io/repos/github/wavesoftware/java-gasper/badge.svg?branch=develop" alt="Coverage Status"></a> <a href="https://www.codacy.com/app/krzysztof-suszynski/java-gasper"><img src="https://api.codacy.com/project/badge/grade/5c4d1180812e438ebe872f9121ec4368" alt="Codacy Badge"></a> <a href="https://sonar.wavesoftware.pl/dashboard/index/2858"><img src="https://img.shields.io/sonar/http/sonar-ro.wavesoftware.pl/pl.wavesoftware:gasper/tech_debt.svg" alt="SonarQube Tech Debt"></a></p>
+
+<p>Gasper is a very simple integration testing JUnit harness for <code>java -jar</code> servers like <a href="http://wildfly-swarm.io/">WildFly Swarm</a> and <a href="http://projects.spring.io/spring-boot/">Spring Boot</a>.</p>
+
+<p><a href="http://wildfly-swarm.io/"><img src="https://avatars3.githubusercontent.com/u/11523816?v=3&amp;s=100" alt="WildFly Swarm"></a> <a href="http://projects.spring.io/spring-boot/"><img src="https://avatars2.githubusercontent.com/u/317776?v=3&amp;s=100" alt="Spring Boot"></a></p>
+
+<p>Gasper provides a simple to use JUnit <code>TestRule</code> that can be used to build integration tests with simple apps, like REST micro-services. You can configure Gasper easily with a builder interface. Gasper will start the application before test class and stop it after tests completes.</p>
+
+<p>Gasper supports currently only <a href="https://maven.apache.org/">Maven</a>. The <code>pom.xml</code> file is used to read project configuration achieving zero configuration operation.</p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Gasper utilize your packaged application. It It means it should be used in integration tests that run after application is being packaged by build tool (Maven). Add this code to your <code>pom.xml</code> file (if you didn't done that before):</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;<span class="pl-ent">build</span>&gt;
+[..]
+&lt;<span class="pl-ent">plugins</span>&gt;
+[..]
+  &lt;<span class="pl-ent">plugin</span>&gt;
+    &lt;<span class="pl-ent">groupId</span>&gt;org.apache.maven.plugins&lt;/<span class="pl-ent">groupId</span>&gt;
+    &lt;<span class="pl-ent">artifactId</span>&gt;maven-failsafe-plugin&lt;/<span class="pl-ent">artifactId</span>&gt;
+    &lt;<span class="pl-ent">version</span>&gt;2.19.1&lt;/<span class="pl-ent">version</span>&gt;
+    &lt;<span class="pl-ent">executions</span>&gt;
+      &lt;<span class="pl-ent">execution</span>&gt;
+        &lt;<span class="pl-ent">goals</span>&gt;
+          &lt;<span class="pl-ent">goal</span>&gt;integration-test&lt;/<span class="pl-ent">goal</span>&gt;
+          &lt;<span class="pl-ent">goal</span>&gt;verify&lt;/<span class="pl-ent">goal</span>&gt;
+        &lt;/<span class="pl-ent">goals</span>&gt;
+      &lt;/<span class="pl-ent">execution</span>&gt;
+    &lt;/<span class="pl-ent">executions</span>&gt;
+  &lt;/<span class="pl-ent">plugin</span>&gt;
+[..]
+&lt;/<span class="pl-ent">plugins</span>&gt;
+[..]
+&lt;/<span class="pl-ent">build</span>&gt;</pre></div>
+
+<p>Place your integration tests in classes that ends with <code>*IT</code> or <code>*ITest</code>.</p>
+
+<h3>
+<a id="wildfly-swarm-configuration" class="anchor" href="#wildfly-swarm-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>WildFly Swarm configuration</h3>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">ClassRule</span>
+<span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-smi">Gasper</span> gasper <span class="pl-k">=</span> <span class="pl-smi">Gasper</span><span class="pl-k">.</span>configurations()
+  .wildflySwarm()
+  .build();</pre></div>
+
+<h3>
+<a id="spring-boot-configuration" class="anchor" href="#spring-boot-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Spring Boot configuration</h3>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">ClassRule</span>
+<span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-smi">Gasper</span> gasper <span class="pl-k">=</span> <span class="pl-smi">Gasper</span><span class="pl-k">.</span>configurations()
+  .springBoot()
+  .build();</pre></div>
+
+<p>Before running <code>GasperBuilder.build()</code> method, you can reconfigure those default configurations to your needs.</p>
+
+<h3>
+<a id="example-test-method-unirest--jsonassert" class="anchor" href="#example-test-method-unirest--jsonassert" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example test method (Unirest + JSONAssert)</h3>
+
+<p>Gasper is best to use with libraries like <a href="http://unirest.io/java.html">Unirest</a> for fetching data and asserting HTTP/S statuses and <a href="https://github.com/marcingrzejszczak/jsonassert">JSON Assert</a> to validate correctness of JSON output for REST services.</p>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">Test</span>
+<span class="pl-k">public</span> <span class="pl-k">void</span> testGetRoot() throws <span class="pl-smi">UnirestException</span> {
+  <span class="pl-c">// given</span>
+  <span class="pl-smi">String</span> address <span class="pl-k">=</span> gasper<span class="pl-k">.</span>getAddress(); <span class="pl-c">// Address to deployed app, running live on random port</span>
+  <span class="pl-smi">String</span> expectedMessage <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>WildFly Swarm!<span class="pl-pds">"</span></span>;
+
+  <span class="pl-c">// when</span>
+  <span class="pl-k">HttpResponse&lt;<span class="pl-smi">String</span>&gt;</span> response <span class="pl-k">=</span> <span class="pl-smi">Unirest</span><span class="pl-k">.</span>get(address)<span class="pl-k">.</span>asString();
+
+  <span class="pl-c">// then</span>
+  assertThat(response<span class="pl-k">.</span>getStatus())<span class="pl-k">.</span>isEqualTo(<span class="pl-c1">200</span>);
+  assertThat(response<span class="pl-k">.</span>getBody())<span class="pl-k">.</span>field(<span class="pl-s"><span class="pl-pds">"</span>hello<span class="pl-pds">"</span></span>)<span class="pl-k">.</span>isEqualTo(expectedMessage); <span class="pl-c">// JSON Assert</span>
+}</pre></div>
+
+<h3>
+<a id="additional-configuration" class="anchor" href="#additional-configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Additional configuration</h3>
+
+<p>To configure Gasper use <code>GasperBuilder</code> interface, for ex.:</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">private</span> <span class="pl-k">final</span> <span class="pl-k">int</span> port <span class="pl-k">=</span> <span class="pl-c1">11909</span>;
+<span class="pl-k">private</span> <span class="pl-k">final</span> <span class="pl-smi">String</span> webContext <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>/test<span class="pl-pds">"</span></span>;
+<span class="pl-k">private</span> <span class="pl-k">final</span> <span class="pl-smi">String</span> systemPropertyForPort <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>swarm.http.port<span class="pl-pds">"</span></span>;
+
+@<span class="pl-smi">ClassRule</span>
+<span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-smi">Gasper</span> gasper <span class="pl-k">=</span> <span class="pl-smi">Gasper</span><span class="pl-k">.</span>configure()
+  .silentGasperMessages()
+  .usingSystemPropertyForPort(systemPropertyForPort)
+  .withSystemProperty(<span class="pl-s"><span class="pl-pds">"</span>swarm.context.path<span class="pl-pds">"</span></span>, webContext)
+  .withSystemProperty(systemPropertyForPort, <span class="pl-smi">String</span><span class="pl-k">.</span>valueOf(port))
+  .withJVMOptions(<span class="pl-s"><span class="pl-pds">"</span>-server<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>-Xms1G<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>-Xmx1G<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>-XX:+UseConcMarkSweepGC<span class="pl-pds">"</span></span>)
+  .withMaxStartupTime(<span class="pl-c1">100</span>)
+  .withMaxDeploymentTime(<span class="pl-c1">20</span>)
+  .withEnvironmentVariable(<span class="pl-s"><span class="pl-pds">"</span>jdbc.password<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>S3CreT!1<span class="pl-pds">"</span></span>)
+  .withTestApplicationLoggingOnConsole()
+  .usingPomFile(<span class="pl-smi">Paths</span><span class="pl-k">.</span>get(<span class="pl-s"><span class="pl-pds">"</span>pom.xml<span class="pl-pds">"</span></span>))
+  .withArtifactPackaging(<span class="pl-s"><span class="pl-pds">"</span>jar<span class="pl-pds">"</span></span>)
+  .waitForWebContext(webContext)
+  .withArtifactClassifier(<span class="pl-s"><span class="pl-pds">"</span>swarm<span class="pl-pds">"</span></span>)
+  .usingWebContextChecker(<span class="pl-smi">GasperBuilderTest</span><span class="pl-k">::</span>checkContext)
+  .withPort(port)
+  .build();</pre></div>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
+
+<h3>
+<a id="maven" class="anchor" href="#maven" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Maven</h3>
+
+<div class="highlight highlight-text-xml"><pre>&lt;<span class="pl-ent">dependency</span>&gt;
+    &lt;<span class="pl-ent">groupId</span>&gt;pl.wavesoftware&lt;/<span class="pl-ent">groupId</span>&gt;
+    &lt;<span class="pl-ent">artifactId</span>&gt;gasper&lt;/<span class="pl-ent">artifactId</span>&gt;
+    &lt;<span class="pl-ent">version</span>&gt;1.0.0&lt;/<span class="pl-ent">version</span>&gt;
+    &lt;<span class="pl-ent">scope</span>&gt;test&lt;/<span class="pl-ent">scope</span>&gt;
+&lt;/<span class="pl-ent">dependency</span>&gt;</pre></div>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>Contributions are welcome!</p>
+
+<p>To contribute, follow the standard <a href="http://danielkummer.github.io/git-flow-cheatsheet/">git flow</a> of:</p>
+
+<ol>
+<li>Fork it</li>
+<li>Create your feature branch (<code>git checkout -b feature/my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin feature/my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol>
+
+<p>Even if you can't contribute code, if you have an idea for an improvement please open an <a href="https://github.com/wavesoftware/java-gasper/issues">issue</a>.</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>Java 8</li>
+<li>Maven 3</li>
+</ul>
+
+<h2>
+<a id="releases" class="anchor" href="#releases" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Releases</h2>
+
+<ul>
+<li>
+<code>1.0.0</code> - codename: <em>SkyMango</em>
+
+<ul>
+<li>First publicly available release</li>
+</ul>
+</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/wavesoftware/java-gasper">Gasper!</a> is maintained by <a href="https://github.com/wavesoftware">wavesoftware</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
