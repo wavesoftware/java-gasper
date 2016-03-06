@@ -1,6 +1,6 @@
 # Gasper!
 
-[![Build Status](https://travis-ci.org/wavesoftware/java-gasper.svg?branch=develop)](https://travis-ci.org/wavesoftware/java-gasper) [![Coverage Status](https://coveralls.io/repos/github/wavesoftware/java-gasper/badge.svg?branch=develop)](https://coveralls.io/github/wavesoftware/java-gasper?branch=develop)
+[![Build Status](https://travis-ci.org/wavesoftware/java-gasper.svg?branch=develop)](https://travis-ci.org/wavesoftware/java-gasper) [![Coverage Status](https://coveralls.io/repos/github/wavesoftware/java-gasper/badge.svg?branch=develop)](https://coveralls.io/github/wavesoftware/java-gasper?branch=develop) [![Codacy Badge](https://api.codacy.com/project/badge/grade/5c4d1180812e438ebe872f9121ec4368)](https://www.codacy.com/app/krzysztof-suszynski/java-gasper) [![SonarQube Tech Debt](https://img.shields.io/sonar/http/sonar-ro.wavesoftware.pl/pl.wavesoftware:gasper/tech_debt.svg)](https://sonar.wavesoftware.pl/dashboard/index/2858)
 
 Gasper is a very simple integration testing JUnit harness for `java -jar` servers like [WildFly Swarm](http://wildfly-swarm.io/) and [Spring Boot](http://projects.spring.io/spring-boot/).
 
