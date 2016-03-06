@@ -1,9 +1,10 @@
-package pl.wavesoftware.gasper;
+package pl.wavesoftware.gasper.internal;
 
 import com.mashape.unirest.http.Unirest;
 import org.junit.Test;
 import pl.wavesoftware.eid.utils.EidPreconditions;
-import pl.wavesoftware.gasper.internal.HttpEndpoint;
+import pl.wavesoftware.gasper.Gasper;
+import pl.wavesoftware.gasper.GasperBuilder;
 
 import java.nio.file.Paths;
 
@@ -14,11 +15,11 @@ import static pl.wavesoftware.eid.utils.EidPreconditions.tryToExecute;
  * @author Krzysztof Suszyński <krzysztof.suszynski@wavesoftware.pl>
  * @since 2016-03-05
  */
-public class GasperBuilderTest {
+public class AbstractGasperBuilderTest {
 
     @Test
     public void testBuild() throws Exception {
-        GasperBuilder builder = new GasperBuilder();
+        GasperBuilder builder = new AbstractGasperBuilder() {};
         int port = 11909;
         String webContext = "/test";
         String systemPropertyForPort = "swarm.http.port";
@@ -35,7 +36,7 @@ public class GasperBuilderTest {
             .withArtifactPackaging("jar")
             .waitForWebContext(webContext)
             .withArtifactClassifier("swarm")
-            .usingWebContextChecker(GasperBuilderTest::checkContext)
+            .usingWebContextChecker(AbstractGasperBuilderTest::checkContext)
             .withPort(port)
             .build();
 

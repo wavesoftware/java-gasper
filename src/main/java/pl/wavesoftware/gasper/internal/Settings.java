@@ -15,11 +15,11 @@ import java.util.function.Function;
 /**
  * This class represents a set of settings for Gasper. It is used as a POJO with settings.
  * <p>
- * <strong>CAUTION!</strong> It is internal class of Gasper, and shouldn't be used directly. Use gasper builder interface {@link Gasper#builder()} or {@link Gasper#configurations()} to set those settings.
+ * <strong>CAUTION!</strong> It is internal class of Gasper, and shouldn't be used directly. Use gasper configure interface {@link Gasper#configure()} or {@link Gasper#configurations()} to set those settings.
  *
  * @author Krzysztof Suszyński <krzysztof.suszynski@wavesoftware.pl>
  * @since 2016-03-05
- * @see Gasper#builder()
+ * @see Gasper#configure()
  * @see Gasper#configurations()
  */
 @Getter

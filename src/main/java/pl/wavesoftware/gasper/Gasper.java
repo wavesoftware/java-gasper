@@ -9,6 +9,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import pl.wavesoftware.eid.utils.EidPreconditions;
+import pl.wavesoftware.gasper.internal.AbstractGasperBuilder;
 import pl.wavesoftware.gasper.internal.Executor;
 import pl.wavesoftware.gasper.internal.Logger;
 import pl.wavesoftware.gasper.internal.Settings;
@@ -37,7 +38,7 @@ public final class Gasper implements TestRule {
     public static final int DEFAULT_PORT_AVAILABLE_MAX_SECONDS = 60;
     public static final int DEFAULT_DEPLOYMENT_MAX_SECONDS = 30;
     public static final String DEFAULT_CONTEXT = "/";
-    private static final String figlet;
+    private static final String FIGLET;
 
     private final Settings settings;
     private Path artifact;
@@ -46,12 +47,18 @@ public final class Gasper implements TestRule {
 
     static {
         InputStream is = Gasper.class.getClassLoader().getResourceAsStream("gasper.txt");
-        figlet = tryToExecute((EidPreconditions.UnsafeSupplier<String>) () ->
+        FIGLET = tryToExecute((EidPreconditions.UnsafeSupplier<String>) () ->
             CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8)), "20160305:201329");
     }
 
-    public static GasperBuilder builder() {
-        return new GasperBuilder();
+    /**
+     * Creates a builder interface {@link GasperBuilder} that can be used to configure Gasper.
+     * <p>
+     * You can also use already created configurations by using method {@link #configurations()} for convenience.
+     * @return a configure interface for configuration purposes
+     */
+    public static GasperBuilder configure() {
+        return new GasperBuilderImpl();
     }
 
     public static GasperConfigurations configurations() {
@@ -66,39 +73,23 @@ public final class Gasper implements TestRule {
         return settings.getEndpoint().fullAddress();
     }
 
-    protected abstract static class RunnerCreator {
-        public Gasper create(Settings settings) {
+    protected interface RunnerCreator {
+        default Gasper create(Settings settings) {
             return new Gasper(settings);
         }
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
-        GasperStatement afterStmt = new GasperStatement(base, this);
         return tryToExecute((EidPreconditions.UnsafeSupplier<Statement>) () -> {
             setup();
             before();
-            return afterStmt;
+            return new GasperStatement(base, this::after);
         }, "20160305:004035");
     }
 
-    @RequiredArgsConstructor
-    private static class GasperStatement extends Statement {
-        private final Statement base;
-        private final Gasper gasper;
-
-        @Override
-        public void evaluate() throws Throwable {
-            try {
-                base.evaluate();
-            } finally {
-                gasper.after();
-            }
-        }
-    }
-
     private void setup() {
-        log(figlet);
+        log(FIGLET);
         MavenResolver resolver = new MavenResolver(settings.getPomfile());
         artifact = resolver.getBuildArtifact(settings.getPackaging(), settings.getClassifier());
         File workingDirectory = resolver.getBuildDirectory();
@@ -110,6 +101,31 @@ public final class Gasper implements TestRule {
     private void before() throws IOException {
         executor.start();
         log("All looks ready, running tests...");
+    }
+
+    private void after() {
+        log("Testing on server completed.");
+        executor.stop();
+    }
+
+    @RequiredArgsConstructor
+    private static class GasperStatement extends Statement {
+        private final Statement base;
+        private final Procedure procedure;
+
+        @Override
+        public void evaluate() throws Throwable {
+            try {
+                base.evaluate();
+            } finally {
+                procedure.execute();
+            }
+        }
+    }
+
+    @FunctionalInterface
+    private interface Procedure {
+        void execute();
     }
 
     private List<String> buildCommand() {
@@ -129,11 +145,6 @@ public final class Gasper implements TestRule {
         );
     }
 
-    private void after() {
-        log("Testing on server completed.");
-        executor.stop();
-    }
-
     private void log(String frmt, Object... args) {
         ensureLogger();
         logger.info(format(frmt, args));
@@ -143,5 +154,9 @@ public final class Gasper implements TestRule {
         if (logger == null) {
             logger = new Logger(log, settings);
         }
+    }
+
+    private static class GasperBuilderImpl extends AbstractGasperBuilder {
+
     }
 }

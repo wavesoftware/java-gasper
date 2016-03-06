@@ -57,7 +57,7 @@ private final int port = 11909;
 private final String webContext = "/test";
 private final String systemPropertyForPort = "swarm.http.port";
 @ClassRule
-public static Gasper gasper = Gasper.builder()
+public static Gasper gasper = Gasper.configure()
   .silentGasperMessages()
   .usingSystemPropertyForPort(systemPropertyForPort)
   .withSystemProperty("swarm.context.path", webContext)
@@ -87,12 +87,6 @@ public static Gasper gasper = Gasper.builder()
     <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
-```
-
-### Gradle
-
-```groovy
-testCompile 'pl.wavesoftware:gasper:1.0.0'
 ```
 
 ## Requirements

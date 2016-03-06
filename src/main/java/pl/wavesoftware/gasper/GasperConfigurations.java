@@ -4,7 +4,7 @@ package pl.wavesoftware.gasper;
  * This class holds supported and tested configurations for servers.
  * <p>
  * Configuration in this class are fairly tested and can serve as a base for configuration.
- * You shouldn't try to use this class directly. Use instead {@link Gasper#builderPreconfigured()} for entry point.
+ * You shouldn't try to use this class directly. Use instead {@link Gasper#configurations()} for entry point.
  * <p>
  * Example:
  * <pre>
@@ -23,7 +23,7 @@ public final class GasperConfigurations {
     protected GasperConfigurations() {}
 
     /**
-     * This method returns pre-configured Gasper builder to use with WildFly Swarm.
+     * This method returns pre-configured Gasper configuration to use with WildFly Swarm.
      * <p>
      * You can use it directly or use {@link GasperBuilder} interface to re-configure it to you needs.
      * <p>
@@ -31,14 +31,14 @@ public final class GasperConfigurations {
      * @return pre-configured {@link GasperBuilder} to use with WildFly Swarm.
      */
     public GasperBuilder wildflySwarm() {
-        return Gasper.builder()
+        return Gasper.configure()
             .withArtifactPackaging("jar")
             .withArtifactClassifier("swarm")
             .usingSystemPropertyForPort(GasperConfigurations.WILDFLY_SWARM);
     }
 
     /**
-     * This method returns pre-configured Gasper builder to use with Spring Boot.
+     * This method returns pre-configured Gasper configure to use with Spring Boot.
      * <p>
      * You can use it directly or use {@link GasperBuilder} interface to re-configure it to you needs.
      * <p>
@@ -46,7 +46,7 @@ public final class GasperConfigurations {
      * @return pre-configured {@link GasperBuilder} to use with Spring Boot.
      */
     public GasperBuilder springBoot() {
-        return Gasper.builder()
+        return Gasper.configure()
             .withArtifactPackaging("jar")
             .usingSystemPropertyForPort(GasperConfigurations.SPRING_BOOT);
     }

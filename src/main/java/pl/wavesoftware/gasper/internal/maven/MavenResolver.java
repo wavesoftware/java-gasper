@@ -4,7 +4,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -37,8 +38,8 @@ public class MavenResolver {
         checkArgument(pomfile.toFile().isFile(), "20160305:181005");
         MavenXpp3Reader mavenReader = new MavenXpp3Reader();
         model = tryToExecute((UnsafeSupplier<Model>) () -> {
-            FileReader reader = new FileReader(pomfile.toString());
-            return mavenReader.read(reader);
+            InputStream is = new FileInputStream(pomfile.toFile());
+            return mavenReader.read(is);
         }, "20160305:203232");
         checkNotNull(model, "20160305:203551").setPomFile(pomfile.toFile());
         pomDirectory = pomfile.getParent() == null ? CURRENT_DIR : pomfile.getParent();

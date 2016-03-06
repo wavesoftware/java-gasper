@@ -9,12 +9,12 @@ import org.slf4j.event.Level;
  */
 @RequiredArgsConstructor
 public class Logger {
-    private final org.slf4j.Logger logger;
+    private final org.slf4j.Logger slf;
     private final Settings settings;
 
     public void info(String message) {
         if (settings.getLevel().toInt() <= Level.INFO.toInt()) {
-            logger.info(message);
+            slf.info(message);
         }
     }
 }

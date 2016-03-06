@@ -61,11 +61,10 @@ public class Executor {
     }
 
     private void waitForHttpContext() {
-        Integer port = settings.getPort();
         String context = settings.getContext();
         int maxWait = settings.getDeploymentMaxTime();
         log("Waiting for deployment for context: \"%s\" to happen...", context);
-        boolean ok = waitForContextToBecomeAvailable(port, context, maxWait);
+        boolean ok = waitForContextToBecomeAvailable(context, maxWait);
         if (!ok) {
             throw new EidIllegalStateException(new Eid("20160305:123206"),
                 "Context %s in not available after waiting %s seconds, aborting!",
@@ -74,17 +73,38 @@ public class Executor {
         }
     }
 
-    private boolean waitForContextToBecomeAvailable(int port, String context, int maxSeconds) {
+    private boolean waitForContextToBecomeAvailable(String context, int maxSeconds) {
+        return waitOnProcess(maxSeconds, (step) -> {
+            if (isContextAvailable()) {
+                int waited = WAIT_STEP * step;
+                log("Context \"%s\" became available after ~%dms!", context, waited);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private boolean waitForPortToBecomeAvailable(int port, int maxSeconds) {
+        return waitOnProcess(maxSeconds, (step) -> {
+            if (isPortTaken(port)) {
+                int waited = WAIT_STEP * step;
+                log("Port %d became available after ~%dms!", port, waited);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private boolean waitOnProcess(int maxSeconds, Function<Integer, Boolean> supplier) {
         for (int i = 1; i <= maxSeconds * WAIT_STEPS_IN_SECOND; i++) {
             try {
                 process.waitFor(WAIT_STEP, TimeUnit.MILLISECONDS);
-                if (isContextAvailable()) {
-                    int waited = WAIT_STEP * i;
-                    log("Context \"%s\" became available after ~%dms!", context, waited);
+                if (supplier.apply(i)) {
                     return true;
                 }
             } catch (InterruptedException e) {
                 log.error("Tried to wait " + WAIT_STEP + "ms, failed: " + e.getLocalizedMessage(), e);
+                Thread.currentThread().interrupt();
             }
         }
         return false;
@@ -111,29 +131,13 @@ public class Executor {
     private void startAndWaitForPort() {
         Integer port = settings.getPort();
         log("Waiting for port: %d to became active...", port);
-        boolean ok = waitForPortToBecomeAvailable(process, port, settings.getPortAvailableMaxTime());
+        boolean ok = waitForPortToBecomeAvailable(port, settings.getPortAvailableMaxTime());
         if (!ok) {
             throw new EidIllegalStateException(new Eid("20160305:003452"),
                 "Process %s probably didn't started well after maximum wait time is reached: %s",
                 command.toString(), settings.getPortAvailableMaxTime()
             );
         }
-    }
-
-    private boolean waitForPortToBecomeAvailable(Process process, int port, int maxSeconds) {
-        for (int i = 1; i <= maxSeconds * WAIT_STEPS_IN_SECOND; i++) {
-            try {
-                process.waitFor(WAIT_STEP, TimeUnit.MILLISECONDS);
-                if (isPortTaken(port)) {
-                    int waited = WAIT_STEP * i;
-                    log("Port %d became available after ~%dms!", port, waited);
-                    return true;
-                }
-            } catch (InterruptedException e) {
-                log.error("Tried to wait " + WAIT_STEP + "ms, failed: " + e.getLocalizedMessage(), e);
-            }
-        }
-        return false;
     }
 
     private void logToFile(ProcessBuilder pb) {
